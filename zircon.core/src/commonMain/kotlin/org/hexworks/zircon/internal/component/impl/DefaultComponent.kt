@@ -12,6 +12,7 @@ import org.hexworks.cobalt.events.api.Subscription
 import org.hexworks.cobalt.logging.api.LoggerFactory
 import org.hexworks.zircon.api.behavior.Movable
 import org.hexworks.zircon.api.behavior.TextOverride
+import org.hexworks.zircon.api.builder.component.ComponentStyleSetBuilder
 import org.hexworks.zircon.api.component.ColorTheme
 import org.hexworks.zircon.api.component.Component
 import org.hexworks.zircon.api.component.ComponentStyleSet
@@ -54,6 +55,7 @@ import org.hexworks.zircon.internal.event.ZirconEvent.RequestFocusFor
 import org.hexworks.zircon.internal.event.ZirconScope
 import org.hexworks.zircon.internal.uievent.UIEventProcessor
 import org.hexworks.zircon.internal.uievent.impl.DefaultUIEventProcessor
+import org.hexworks.zircon.internal.util.orElse
 import kotlin.jvm.Synchronized
 
 @Suppress("UNCHECKED_CAST")
@@ -72,32 +74,17 @@ abstract class DefaultComponent(
 
     private val logger = LoggerFactory.getLogger(this::class)
 
-    // Identifiable
     final override val id: UUID = UUID.randomUUID()
-
     final override val name: String = componentMetadata.name
 
-    // Hideable
-    final override val hiddenProperty = createPropertyFrom(false)
-    final override var isHidden: Boolean by hiddenProperty.asDelegate()
-
-    // TilesetOverride
-    final override val tilesetProperty = componentMetadata.tileset.toProperty { newValue ->
-        tileset.isCompatibleWith(newValue)
-    }
-    override var tileset: TilesetResource by tilesetProperty.asDelegate()
-
-    // Component
+    // component state and position
     final override val rootValue = Maybe.empty<RootContainer>().toProperty()
     final override var root: Maybe<RootContainer> by rootValue.asDelegate()
-
     final override val parentProperty = Maybe.empty<InternalContainer>().toProperty()
     final override var parent: Maybe<InternalContainer> by parentProperty.asDelegate()
     final override val hasParent: ObservableValue<Boolean> = parentProperty.bindTransform { it.isPresent }
-
     final override val hasFocusValue = false.toProperty()
     final override val hasFocus: Boolean by hasFocusValue.asDelegate()
-
     final override val absolutePosition: Position
         get() = position
     final override var relativePosition: Position = componentMetadata.relativePosition
@@ -106,36 +93,55 @@ abstract class DefaultComponent(
         get() = rect.withPosition(relativePosition)
     final override val contentOffset: Position by lazy { renderer.contentPosition }
     final override val contentSize: Size by lazy { renderer.calculateContentSize(size) }
-
     final override val componentStateValue = DEFAULT.toProperty()
     final override var componentState: ComponentState by componentStateValue.asDelegate()
 
-    final override val componentStyleSetProperty = createPropertyFrom(componentMetadata.componentStyleSet)
+    override val children: ObservableList<InternalComponent> = persistentListOf<InternalComponent>().toProperty()
+
+    // Common properties
+    final override val themeProperty = componentMetadata.themeProperty
+    final override var theme: ColorTheme by themeProperty.asDelegate()
+
+    final override val componentStyleSetProperty = componentMetadata.componentStyleSetProperty
     final override var componentStyleSet: ComponentStyleSet
-        get() = styleOverride.orElse(themeStyle)
+        get() {
+            return when {
+                styleOverride.isNotUnknown -> styleOverride
+                themeStyle.isNotUnknown -> themeStyle
+                theme.isNotUnknown -> {
+                    themeStyle = convertColorTheme(theme)
+                    themeStyle
+                }
+                else -> ComponentStyleSet.unknown()
+            }
+        }
         @Synchronized
         set(value) {
             componentStyleSetProperty.value = value
-            styleOverride = Maybe.of(value)
+            styleOverride = value
         }
 
-    override val children: ObservableList<InternalComponent> = persistentListOf<InternalComponent>().toProperty()
+    private var styleOverride = componentMetadata.componentStyleSet
+    private var themeStyle = componentMetadata.componentStyleSet
 
-    // ComponentProperties
-    final override val disabledProperty = false.toProperty()
+    final override val tilesetProperty = componentMetadata.tileset.toProperty { newValue ->
+        // TODO: fix this
+        // tileset isCompatibleWith newValue
+        true
+    }.apply {
+        bind(componentMetadata.tilesetProperty)
+    }
+    override var tileset: TilesetResource by tilesetProperty.asDelegate()
+
+    final override val hiddenProperty = componentMetadata.hiddenProperty
+    final override var isHidden: Boolean by hiddenProperty.asDelegate()
+
+    final override val disabledProperty = componentMetadata.disabledProperty
     final override var isDisabled: Boolean by disabledProperty.asDelegate()
 
-    final override val themeProperty = RuntimeConfig.config.defaultColorTheme.toProperty()
-    final override var theme: ColorTheme by themeProperty.asDelegate()
 
+    // Misc
     final override val updateOnAttach = componentMetadata.updateOnAttach
-
-    private var styleOverride = Maybe.ofNullable(
-        if (componentMetadata.componentStyleSet.isDefault) {
-            null
-        } else componentMetadata.componentStyleSet
-    )
-    private var themeStyle = componentMetadata.componentStyleSet
 
     init {
         disabledProperty.onChange {
@@ -151,10 +157,7 @@ abstract class DefaultComponent(
             themeStyle = convertColorTheme(it.newValue)
         }
         componentStyleSetProperty.onChange {
-            styleOverride = Maybe.of(it.newValue) // TODO: add regression test for this line!
-        }
-        componentMetadata.theme?.let { theme ->
-            this.theme = theme
+            styleOverride = it.newValue
         }
     }
 
@@ -251,22 +254,6 @@ abstract class DefaultComponent(
     override fun deactivated() = whenEnabledRespondWith {
         updateComponentState(DEACTIVATED)
         Processed
-    }
-
-    final override fun onActivated(fn: (ComponentEvent) -> Unit): Subscription {
-        return processComponentEvents(ComponentEventType.ACTIVATED, fn)
-    }
-
-    final override fun onDeactivated(fn: (ComponentEvent) -> Unit): Subscription {
-        return processComponentEvents(ComponentEventType.DEACTIVATED, fn)
-    }
-
-    final override fun onFocusGiven(fn: (ComponentEvent) -> Unit): Subscription {
-        return processComponentEvents(ComponentEventType.FOCUS_GIVEN, fn)
-    }
-
-    final override fun onFocusTaken(fn: (ComponentEvent) -> Unit): Subscription {
-        return processComponentEvents(ComponentEventType.FOCUS_TAKEN, fn)
     }
 
     override fun toString(): String {

@@ -9,7 +9,6 @@ import org.hexworks.zircon.api.color.TileColor
 import org.hexworks.zircon.api.component.ComponentStyleSet
 import org.hexworks.zircon.api.component.ToggleButton
 import org.hexworks.zircon.api.component.data.ComponentMetadata
-import org.hexworks.zircon.api.component.data.ComponentState
 import org.hexworks.zircon.api.component.data.ComponentState.ACTIVE
 import org.hexworks.zircon.api.component.data.ComponentState.DEFAULT
 import org.hexworks.zircon.api.component.data.ComponentState.FOCUSED

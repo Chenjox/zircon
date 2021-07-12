@@ -18,7 +18,7 @@ class DefaultVerticalTabBar(
 
     override val root = Components.hbox()
         .withComponentRenderer(NoOpComponentRenderer())
-        .withSize(contentSize.withRelativeWidth(barSize.width))
+        .withPreferredSize(contentSize.withRelativeWidth(barSize.width))
         .build()
 
     private lateinit var currentTab: Button
@@ -26,7 +26,7 @@ class DefaultVerticalTabBar(
     init {
         val bar = Components.vbox()
             .withComponentRenderer(NoOpComponentRenderer())
-            .withSize(barSize)
+            .withPreferredSize(barSize)
             .build().apply { root.addComponent(this) }
 
         var contentArea = createContentArea(contentSize)
@@ -59,6 +59,6 @@ class DefaultVerticalTabBar(
             val bg = ctx.component.theme.primaryBackgroundColor.withAlpha(25)
             tileGraphics.fill(Tile.empty().withBackgroundColor(bg))
         }
-        .withSize(size)
+        .withPreferredSize(size)
         .build()
 }

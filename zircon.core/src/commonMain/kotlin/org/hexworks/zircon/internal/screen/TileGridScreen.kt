@@ -1,9 +1,11 @@
 package org.hexworks.zircon.internal.screen
 
 import org.hexworks.cobalt.core.platform.factory.UUIDFactory
+import org.hexworks.cobalt.databinding.api.extension.toProperty
 import org.hexworks.cobalt.events.api.Subscription
 import org.hexworks.cobalt.events.api.simpleSubscribeTo
 import org.hexworks.cobalt.logging.api.LoggerFactory
+import org.hexworks.zircon.api.component.ColorTheme
 import org.hexworks.zircon.api.component.ComponentStyleSet
 import org.hexworks.zircon.api.component.data.ComponentMetadata
 import org.hexworks.zircon.api.component.modal.Modal
@@ -69,7 +71,7 @@ class TileGridScreen(
                 LOGGER.debug("Deactivating screen (id=${id.abbreviate()}).")
                 deactivate()
             }
-        }.disposeWhen(isClosed)
+        }.disposeWhen(closedValue)
     }
 
     // note that events / event listeners on the screen itself are only handled
@@ -160,11 +162,10 @@ class TileGridScreen(
             initialTileset: TilesetResource
         ): ModalComponentContainer {
             val metadata = ComponentMetadata(
-                size = initialSize,
                 relativePosition = Position.defaultPosition(),
-                tileset = initialTileset,
-                componentStyleSet = ComponentStyleSet.defaultStyleSet(),
-                name = "Modal Component Container"
+                size = initialSize,
+                name = "Modal Component Container",
+                tilesetProperty = initialTileset.toProperty()
             )
             return ModalComponentContainer(
                 metadata = metadata

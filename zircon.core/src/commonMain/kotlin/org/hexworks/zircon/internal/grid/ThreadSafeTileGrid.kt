@@ -3,6 +3,7 @@ package org.hexworks.zircon.internal.grid
 import org.hexworks.cobalt.databinding.api.collection.ObservableList
 import org.hexworks.cobalt.databinding.api.extension.toProperty
 import org.hexworks.cobalt.databinding.api.property.Property
+import org.hexworks.cobalt.databinding.api.value.ObservableValue
 import org.hexworks.cobalt.datatypes.Maybe
 import org.hexworks.zircon.api.animation.Animation
 import org.hexworks.zircon.api.animation.AnimationHandle
@@ -66,8 +67,6 @@ class ThreadSafeTileGrid(
     override val tilesetProperty: Property<TilesetResource>
         get() = backend.tilesetProperty
 
-    override val isClosed = false.toProperty()
-
     override val layers: ObservableList<out InternalLayer>
         get() = layerable.layers
 
@@ -98,6 +97,9 @@ class ThreadSafeTileGrid(
     override val isCursorAtTheLastRow: Boolean
         get() = cursorHandler.isCursorAtTheLastRow
 
+    override val closedValue: Property<Boolean> = false.toProperty()
+    override val closed: Boolean by closedValue.asDelegate()
+
     override fun getTileAt(position: Position): Maybe<Tile> {
         return backend.getTileAt(position)
     }
@@ -127,7 +129,7 @@ class ThreadSafeTileGrid(
     @Synchronized
     override fun close() {
         animationHandler.close()
-        isClosed.value = true
+        closedValue.value = true
     }
 
     @Synchronized

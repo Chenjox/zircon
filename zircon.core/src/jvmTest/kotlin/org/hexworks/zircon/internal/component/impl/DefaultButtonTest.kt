@@ -19,7 +19,6 @@ import org.hexworks.zircon.api.graphics.TileGraphics
 import org.hexworks.zircon.api.uievent.MouseEvent
 import org.hexworks.zircon.api.uievent.MouseEventType
 import org.hexworks.zircon.api.uievent.MouseEventType.MOUSE_ENTERED
-import org.hexworks.zircon.api.uievent.MouseEventType.MOUSE_PRESSED
 import org.hexworks.zircon.api.uievent.Processed
 import org.hexworks.zircon.api.uievent.UIEventPhase
 import org.hexworks.zircon.internal.component.renderer.DefaultButtonRenderer

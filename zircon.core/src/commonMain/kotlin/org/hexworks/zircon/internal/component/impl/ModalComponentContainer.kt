@@ -146,7 +146,7 @@ class ModalComponentContainer(
                     renderingStrategy = renderingStrategy
                 )
             )
-            container.theme = ColorThemes.empty()
+            container.theme = metadata.theme
             return container
         }
     }

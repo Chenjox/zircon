@@ -154,7 +154,7 @@ abstract class BaseSlider(
                 .withBackgroundColor(TileColor.transparent())
                 .build()
         )
-        .withMouseOverStyle(
+        .withHighlightedStyle(
             StyleSetBuilder.newBuilder()
                 .withForegroundColor(colorTheme.primaryBackgroundColor)
                 .withBackgroundColor(colorTheme.accentColor)

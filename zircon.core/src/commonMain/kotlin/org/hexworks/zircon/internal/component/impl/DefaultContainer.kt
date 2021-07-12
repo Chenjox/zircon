@@ -74,7 +74,7 @@ open class DefaultContainer(
 
     final override fun asInternalComponent(): InternalContainer = this
 
-    override fun convertColorTheme(colorTheme: ColorTheme) = ComponentStyleSet.empty()
+    override fun convertColorTheme(colorTheme: ColorTheme) = ComponentStyleSet.unknown()
 
     override fun acceptsFocus() = false
 

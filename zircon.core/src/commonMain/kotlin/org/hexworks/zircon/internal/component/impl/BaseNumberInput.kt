@@ -26,6 +26,7 @@ import org.hexworks.zircon.internal.component.impl.textedit.transformation.Inser
 import org.hexworks.zircon.internal.component.impl.textedit.transformation.MoveCursor
 import org.hexworks.zircon.internal.event.ZirconEvent
 import org.hexworks.zircon.internal.event.ZirconScope
+import org.hexworks.zircon.internal.util.orElse
 
 //TODO: Finish minValue impl. and bug fixing
 abstract class BaseNumberInput(
@@ -166,11 +167,9 @@ abstract class BaseNumberInput(
             }
             _textBuffer.applyTransformation(InsertCharacter(char))
         } else {
-            if (_textBuffer.getCharAt(_textBuffer.cursor.position).isPresent) {
+            _textBuffer.getCharAtOrNull(_textBuffer.cursor.position)?.let {
                 _textBuffer.applyTransformation(DeleteCharacter(DEL))
-            } else {
-                _textBuffer.applyTransformation(DeleteCharacter(BACKSPACE))
-            }
+            }.orElse { _textBuffer.applyTransformation(DeleteCharacter(BACKSPACE)) }
             checkAndAddChar(char)
         }
     }

@@ -3,7 +3,6 @@ package org.hexworks.zircon.internal.behavior.impl
 import org.hexworks.zircon.api.CP437TilesetResources
 import org.hexworks.zircon.api.ColorThemes
 import org.hexworks.zircon.api.builder.graphics.LayerBuilder
-import org.hexworks.zircon.api.component.ComponentContainer
 import org.hexworks.zircon.api.component.ComponentStyleSet
 import org.hexworks.zircon.api.component.data.ComponentMetadata
 import org.hexworks.zircon.api.data.Position
@@ -18,7 +17,6 @@ import org.hexworks.zircon.internal.component.renderer.RootContainerRenderer
 import org.hexworks.zircon.internal.graphics.Renderable
 import org.junit.Before
 import org.junit.Test
-import org.mockito.MockitoAnnotations
 import kotlin.test.assertEquals
 
 

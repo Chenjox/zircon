@@ -22,8 +22,11 @@ class ModalBuilder<T : ModalResult> : BaseComponentBuilder<Modal<T>, ModalBuilde
     var centeredDialog: Boolean = false
     var contentComponent: Component? = null
 
+    private var shouldCloseWith: T? = null
+    var onClosed: (T) -> Unit = {}
+
     fun withParentSize(size: Size) = also {
-        super.withSize(size)
+        super.withPreferredSize(size)
     }
 
     @JvmOverloads
@@ -37,6 +40,14 @@ class ModalBuilder<T : ModalResult> : BaseComponentBuilder<Modal<T>, ModalBuilde
 
     fun withDarkenPercent(percentage: Double) = also {
         this.darkenPercent = percentage
+    }
+
+    fun withOnClosed(onClosed: (T) -> Unit) = also {
+        this.onClosed = onClosed
+    }
+
+    fun close(result: T) {
+        shouldCloseWith = result
     }
 
     override fun withSize(size: Size): Nothing {
@@ -74,7 +85,12 @@ class ModalBuilder<T : ModalResult> : BaseComponentBuilder<Modal<T>, ModalBuilde
             renderingStrategy = componentRenderer
         )
         modal.addComponent(component)
-        return modal
+        return modal.apply {
+            onClosed(onClosed)
+            shouldCloseWith?.let { result ->
+                close(result)
+            }
+        }
     }
 
     override fun createCopy() = newBuilder<T>()

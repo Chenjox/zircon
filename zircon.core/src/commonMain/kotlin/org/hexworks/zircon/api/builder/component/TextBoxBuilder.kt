@@ -233,7 +233,7 @@ class TextBoxBuilder private constructor(
             components.forEach {
                 textBox.addComponent(it)
             }
-        }
+        }.attachListeners()
     }
 
     override fun createCopy() = TextBoxBuilder(

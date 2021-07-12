@@ -49,7 +49,7 @@ class DefaultSelector<T : Any>(
         addComponent(leftButton)
 
         if (clickable) {
-            addComponent(Components.button().withDecorations().withSize(labelSize).build().apply {
+            addComponent(Components.button().withDecorations().withPreferredSize(labelSize).build().apply {
                 initLabel()
                 processComponentEvents(ComponentEventType.ACTIVATED) {
                     showNextValue()
@@ -57,7 +57,7 @@ class DefaultSelector<T : Any>(
             })
         } else {
             addComponent(Components.label()
-                .withSize(labelSize)
+                .withPreferredSize(labelSize)
                 .build().apply {
                     initLabel()
                 })
